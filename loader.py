@@ -8,6 +8,9 @@ import accuracy as ac
 with open('trained_using_SGD.pkl', 'rb') as f:
 	net = pickle.load(f, encoding="latin1")
 
+with open('trained_adversarial.pkl', 'rb') as f:
+    net2 = pickle.load(f, encoding="latin1")
+
 training_data, validation_data, test_data = mnist_loader.load_data_wrapper()
 training_data, validation_data, test_data = list(training_data), list(validation_data), list(test_data)
 
@@ -23,7 +26,7 @@ def sigmoid(z):
 def sigmoid_prime(z):
     return sigmoid(z)*(1-sigmoid(z))
 
-def predict(a):
+def predict(net, a):
 	"""Return the output of the network if ``a`` is input."""
     #a = binary_thresholding(a)
     #plt.imshow(a.reshape(28, 28), cmap= "Greys")
@@ -99,6 +102,19 @@ def sneaky_generate(n, m):
     a = sneaky_adversarial(net, n, test_data[idx][0], 500, 1)
     return a
 
+def generate(count):
+    adversarial_dataset = []
+    for i in range(count):
+        for j in range(10):
+            for k in range(10):
+                if j!=k:
+                    a = sneaky_generate(j,k)
+                    hot_vector = np.zeros((10,1))
+                    hot_vector[k] = 1.
+                    adversarial_dataset.append([a,hot_vector]) 
+    return adversarial_dataset
+
+
 #Global Code
 # a = sneaky_generate(0,3) 
 # a = test_data[2][0]
@@ -108,4 +124,14 @@ def sneaky_generate(n, m):
 # print('Network output: \n'+ str(p))
 # print('Network prediction: '+ str(np.argmax(p)))
 
-print('Accuracy: ' + str(ac.accuracy(net, hybrid_test_data)))
+# print('Accuracy of FNN for test data without adversaries: ' + str(ac.accuracy(net, hybrid_test_data)))
+# print('Accuracy of Adversarial FNN for test data without adversaries: ' + str(ac.accuracy(net2, hybrid_test_data)))
+
+print(np.argmax(predict(net2, sneaky_generate(0,4))))
+
+# adv_test_data = generate(552)
+# adv_test_data += hybrid_test_data
+# np.random.shuffle(adv_test_data)
+# adv_test_data = adv_test_data
+
+# print('Accuracy of Adversarial FNN for test data with adversaries: ' + str(ac.accuracy(net2, adv_test_data)))
