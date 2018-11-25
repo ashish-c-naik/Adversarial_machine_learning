@@ -13,4 +13,3 @@ def generate(count):
 					hot_vector[k] = 1.
 					adversarial_dataset.append([a,hot_vector]) 
 	return adversarial_dataset
-
