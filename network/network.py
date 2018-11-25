@@ -7,7 +7,6 @@ and omits many desirable features.
 """
 import random #Standard library
 import numpy as np #Third-party libraries
-import knn
 
 class Network(object):
 
