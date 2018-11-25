@@ -4,7 +4,7 @@ import loader
 
 def generate(count):
 	adversarial_dataset = []
-	for i in range(1):
+	for i in range(count):
 		for j in range(10):
 			for k in range(10):
 				if j!=k:
