@@ -18,6 +18,7 @@ hybrid_test_data = []
 for x in test_data:
     hot_vector = np.zeros((10,1))
     hot_vector[x[1]] = 1
+    hot_vector = np.expand_dims(hot_vector, axis=1)
     hybrid_test_data.append([x[0], hot_vector])
 
 def sigmoid(z):
@@ -81,7 +82,7 @@ def sneaky_adversarial(net, n, x_target, steps, eta, lam=0.05):
     #Create a random image to initialize gradient descent with
     x = np.random.normal(.5, .3, (784, 1))
     #Gradient descent on the input
-    for i in range(1):
+    for i in range(steps):
         #Calculate the derivative
         d = input_derivative(net,x,goal)
         #The GD update on x, with an added penalty to the cost function
@@ -99,21 +100,22 @@ def sneaky_generate(n, m):
     while test_data[idx][1] != m:
         idx += 1
     #Hardcode the parameters for the wrapper function
-    a = sneaky_adversarial(net, n, test_data[idx][0], 500, 1)
+    a = sneaky_adversarial(net, n, test_data[idx][0], 100, 1)
     return a
 
 def generate(count):
     adversarial_dataset = []
     for i in range(count):
+        if len(adversarial_dataset) % 1000 == 0:
+            print("Generated ", len(adversarial_dataset), " points")
         for j in range(10):
             for k in range(10):
                 if j!=k:
                     a = sneaky_generate(j,k)
                     hot_vector = np.zeros((10,1))
                     hot_vector[k] = 1.
-                    adversarial_dataset.append([a,hot_vector]) 
+                    adversarial_dataset.append((a,hot_vector)) 
     return adversarial_dataset
-
 
 #Global Code
 # a = sneaky_generate(0,3) 
@@ -127,11 +129,16 @@ def generate(count):
 # print('Accuracy of FNN for test data without adversaries: ' + str(ac.accuracy(net, hybrid_test_data)))
 # print('Accuracy of Adversarial FNN for test data without adversaries: ' + str(ac.accuracy(net2, hybrid_test_data)))
 
-print(np.argmax(predict(net2, sneaky_generate(0,4))))
+# print(np.argmax(predict(net2, sneaky_generate(2,3))))
 
-# adv_test_data = generate(552)
-# adv_test_data += hybrid_test_data
-# np.random.shuffle(adv_test_data)
-# adv_test_data = adv_test_data
+#print(len(test_data))
 
-# print('Accuracy of Adversarial FNN for test data with adversaries: ' + str(ac.accuracy(net2, adv_test_data)))
+# Using normal_test_data because of weird way data is packaged
+adversarial_test_set = generate(112)
+
+
+new_test_set = adversarial_test_set + hybrid_test_data
+
+print('Accuracy of FNN without adversarial training: ' + str(ac.accuracy(net, adversarial_test_set)))
+print('Accuracy of FNN without adversarial training: ' + str(ac.accuracy(net, new_test_set)))
+print('Accuracy of FNN with adversarial training: ' + str(ac.accuracy(net2, new_test_set)))
