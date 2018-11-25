@@ -25,9 +25,17 @@ def sigmoid_prime(z):
 
 def predict(a):
 	"""Return the output of the network if ``a`` is input."""
+    #a = binary_thresholding(a)
+    #plt.imshow(a.reshape(28, 28), cmap= "Greys")
+    #plt.show()
 	FNN = net.feedforward(a)
 	FNN = np.round(FNN, 2)
 	return FNN
+
+def binary_thresholding(x):
+    # Binarize image
+    y = (x > .5).astype(float)
+    return y
 
 def input_derivative(net, x, y):
     #Calculate derivatives wrt the inputs
@@ -92,11 +100,12 @@ def sneaky_generate(n, m):
     return a
 
 #Global Code
-# a = sneaky_generate(0,4) 
+# a = sneaky_generate(0,3) 
 # a = test_data[2][0]
-#plt.imshow(a.reshape(28,28), cmap='Greys')
-# plt.show()   
-#print('Network output: \n'+ str(predict(a)))
-#print('Network prediction: '+ str(np.argmax(predict(a)))) 
+# plt.imshow(a.reshape(28,28), cmap='Greys')
+# plt.show() 
+# p = predict(a)  
+# print('Network output: \n'+ str(p))
+# print('Network prediction: '+ str(np.argmax(p)))
 
 print('Accuracy: ' + str(ac.accuracy(net, hybrid_test_data)))
