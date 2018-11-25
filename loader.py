@@ -3,12 +3,19 @@ import network.mnist_loader as mnist_loader
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
+import accuracy as ac
 
 with open('trained_using_SGD.pkl', 'rb') as f:
 	net = pickle.load(f, encoding="latin1")
 
 training_data, validation_data, test_data = mnist_loader.load_data_wrapper()
 training_data, validation_data, test_data = list(training_data), list(validation_data), list(test_data)
+
+hybrid_test_data = []
+for x in test_data:
+    hot_vector = np.zeros((10,1))
+    hot_vector[x[1]] = 1
+    hybrid_test_data.append([x[0], hot_vector])
 
 def sigmoid(z):
     return 1.0/(1.0+np.exp(-z))
@@ -63,7 +70,7 @@ def sneaky_adversarial(net, n, x_target, steps, eta, lam=0.05):
     #Create a random image to initialize gradient descent with
     x = np.random.normal(.5, .3, (784, 1))
     #Gradient descent on the input
-    for i in range(steps):
+    for i in range(1):
         #Calculate the derivative
         d = input_derivative(net,x,goal)
         #The GD update on x, with an added penalty to the cost function
@@ -85,9 +92,11 @@ def sneaky_generate(n, m):
     return a
 
 #Global Code
-a = sneaky_generate(0,4) 
-# a = test_data[2][0] 
-plt.imshow(a.reshape(28,28), cmap='Greys')
-plt.show()   
-print('Network output: \n'+ str(predict(a)))
-print('Network prediction: '+ str(np.argmax(predict(a)))) 
+# a = sneaky_generate(0,4) 
+# a = test_data[2][0]
+#plt.imshow(a.reshape(28,28), cmap='Greys')
+# plt.show()   
+#print('Network output: \n'+ str(predict(a)))
+#print('Network prediction: '+ str(np.argmax(predict(a)))) 
+
+print('Accuracy: ' + str(ac.accuracy(net, hybrid_test_data)))
