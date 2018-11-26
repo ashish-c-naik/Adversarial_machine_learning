@@ -3,7 +3,6 @@ import network.mnist_loader as mnist_loader
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
-import accuracy as ac
 
 with open('trained_using_SGD.pkl', 'rb') as f:
 	net = pickle.load(f, encoding="latin1")
@@ -14,12 +13,14 @@ with open('trained_adversarial.pkl', 'rb') as f:
 training_data, validation_data, test_data = mnist_loader.load_data_wrapper()
 training_data, validation_data, test_data = list(training_data), list(validation_data), list(test_data)
 
-hybrid_test_data = []
-for x in test_data:
-    hot_vector = np.zeros((10,1))
-    hot_vector[x[1]] = 1
-    hot_vector = np.expand_dims(hot_vector, axis=1)
-    hybrid_test_data.append([x[0], hot_vector])
+def gen_hot_vec(test_data):
+    hotvec_test_data = []
+    for x in test_data:
+        hot_vector = np.zeros((10,1))
+        hot_vector[x[1]] = 1
+        hot_vector = np.expand_dims(hot_vector, axis=1)
+        hotvec_test_data.append([x[0], hot_vector])
+    return hotvec_test_data
 
 def sigmoid(z):
     return 1.0/(1.0+np.exp(-z))
@@ -67,7 +68,7 @@ def input_derivative(net, x, y):
     # Return derivatives WRT to input
     return net.weights[0].T.dot(delta) #Why this?
 
-def sneaky_adversarial(net, n, x_target, steps, eta, lam=0.05):
+def sneaky_adversarial(net, n, x_target, steps, eta, lam=0.3):
     """
     net : network, object neural network instance to use
     n : integer, our goal label (just an int, the function transforms it into a one-hot vector)
@@ -106,8 +107,6 @@ def sneaky_generate(n, m):
 def generate(count):
     adversarial_dataset = []
     for i in range(count):
-        if len(adversarial_dataset) % 1000 == 0:
-            print("Generated ", len(adversarial_dataset), " points")
         for j in range(10):
             for k in range(10):
                 if j!=k:
@@ -117,28 +116,24 @@ def generate(count):
                     adversarial_dataset.append((a,hot_vector)) 
     return adversarial_dataset
 
-#Global Code
+def accuracy(net, test_data):
+    count = 0
+    for x in range(len(test_data)):
+        if np.argmax(test_data[x][1]) == np.argmax(np.round(net.feedforward(test_data[x][0]), 2)):
+            count += 1
+    return (count/float(len(test_data)))*100
+
+# Global Code
 # a = sneaky_generate(0,3) 
 # a = test_data[2][0]
 # plt.imshow(a.reshape(28,28), cmap='Greys')
 # plt.show() 
-# p = predict(a)  
+# p = predict(net,a)
+# p = predict(net2,a)
 # print('Network output: \n'+ str(p))
 # print('Network prediction: '+ str(np.argmax(p)))
-
-# print('Accuracy of FNN for test data without adversaries: ' + str(ac.accuracy(net, hybrid_test_data)))
-# print('Accuracy of Adversarial FNN for test data without adversaries: ' + str(ac.accuracy(net2, hybrid_test_data)))
-
-# print(np.argmax(predict(net2, sneaky_generate(2,3))))
-
-#print(len(test_data))
-
-# Using normal_test_data because of weird way data is packaged
 adversarial_test_set = generate(112)
-
-
-new_test_set = adversarial_test_set + hybrid_test_data
-
-print('Accuracy of FNN without adversarial training: ' + str(ac.accuracy(net, adversarial_test_set)))
-print('Accuracy of FNN without adversarial training: ' + str(ac.accuracy(net, new_test_set)))
-print('Accuracy of FNN with adversarial training: ' + str(ac.accuracy(net2, new_test_set)))
+new_test_set = adversarial_test_set + gen_hot_vec(test_data)
+print('Accuracy of attack on untrained FNN: ' + str(100 - accuracy(net, adversarial_test_set)))
+print('Accuracy of FNN on hybrid(adversarial+non-adversarial) test set without adversarial training: ' + str(accuracy(net, new_test_set)) +'%')
+print('Accuracy of FNN on hybrid(adversarial+non-adversarial) test set with adversarial training: ' + str(accuracy(net2, new_test_set)) + '%')
