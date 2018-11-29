@@ -4,12 +4,6 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 
-"""
-50000 - Adversarial training samples
-10000 - Adversarial test samples
-
-"""
-
 with open('trained_using_SGD.pkl', 'rb') as f:
 	net = pickle.load(f, encoding="latin1")
 
