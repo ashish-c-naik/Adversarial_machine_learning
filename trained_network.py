@@ -14,7 +14,6 @@ with open('adversarial_samples_training_set.pkl', 'rb') as f:
 # pickle.dump(net, open(filename, 'wb'))
 
 net2 = Network.Network([784,30,10])
-net2.SGD(adversarial_dataset + training_data, 30, 10, 3.0, test_data=test_data)
+net2.SGD(adversarial_dataset + training_data, 50, 5, 0.5, test_data=test_data)
 filename = 'trained_adversarial.pkl'
 pickle.dump(net2, open(filename, 'wb'))
-
