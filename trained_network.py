@@ -5,7 +5,8 @@ import loader
 
 training_data, validation_data, test_data = mnist_loader.load_data_wrapper()
 training_data, validation_data, test_data = list(training_data), list(validation_data), list(test_data)
-adversarial_dataset = loader.generate(556)
+with open('adversarial_samples_training_set.pkl', 'rb') as f:
+	adversarial_dataset = pickle.load(f, encoding="latin1")
 
 # net = Network.Network([784,30,10])
 # net.SGD(training_data, 50, 5, 0.1, test_data)

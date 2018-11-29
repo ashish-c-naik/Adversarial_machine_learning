@@ -4,11 +4,17 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 
+"""
+50000 - Adversarial training samples
+10000 - Adversarial test samples
+
+"""
+
 with open('trained_using_SGD.pkl', 'rb') as f:
 	net = pickle.load(f, encoding="latin1")
 
-with open('trained_adversarial.pkl', 'rb') as f:
-    net2 = pickle.load(f, encoding="latin1")
+# with open('trained_adversarial.pkl', 'rb') as f:
+#     net2 = pickle.load(f, encoding="latin1")
 
 training_data, validation_data, test_data = mnist_loader.load_data_wrapper()
 training_data, validation_data, test_data = list(training_data), list(validation_data), list(test_data)
@@ -116,6 +122,21 @@ def generate(count):
                     adversarial_dataset.append((a,hot_vector)) 
     return adversarial_dataset
 
+def generate_using_training_set(count):
+    adversarial_dataset = []
+    for i in range(count):
+        for j in range(10):
+            for k in range(10):
+                if j!=k:
+                    idx = np.random.randint(0,8000)
+                    while np.argmax(training_data[idx][1]) != k:
+                        idx += 1
+                    a = sneaky_adversarial(net, j, training_data[idx][0], 100, 1)
+                    hot_vector = np.zeros((10,1))
+                    hot_vector[k] = 1.
+                    adversarial_dataset.append((a,hot_vector)) 
+    return adversarial_dataset
+
 def accuracy(net, test_data):
     count = 0
     for x in range(len(test_data)):
@@ -132,8 +153,13 @@ def accuracy(net, test_data):
 # p = predict(net2,a)
 # print('Network output: \n'+ str(p))
 # print('Network prediction: '+ str(np.argmax(p)))
-adversarial_test_set = generate(112)
-new_test_set = adversarial_test_set + gen_hot_vec(test_data)
-print('Accuracy of attack on untrained FNN: ' + str(100 - accuracy(net, adversarial_test_set)))
-print('Accuracy of FNN on hybrid(adversarial+non-adversarial) test set without adversarial training: ' + str(accuracy(net, new_test_set)) +'%')
-print('Accuracy of FNN on hybrid(adversarial+non-adversarial) test set with adversarial training: ' + str(accuracy(net2, new_test_set)) + '%')
+
+# adversarial_test_set = generate(112)
+# new_test_set = adversarial_test_set + gen_hot_vec(test_data)
+# print('Accuracy of attack on untrained FNN: ' + str(100 - accuracy(net, adversarial_test_set)))
+# print('Accuracy of FNN on hybrid(adversarial+non-adversarial) test set without adversarial training: ' + str(accuracy(net, new_test_set)) +'%')
+# print('Accuracy of FNN on hybrid(adversarial+non-adversarial) test set with adversarial training: ' + str(accuracy(net2, new_test_se  t)) + '%')
+
+adversarial_samples_test_set = generate(112)
+fname = 'adversarial_samples_test_set.pkl'
+pickle.dump(adversarial_samples_test_set, open(fname, 'wb'))
