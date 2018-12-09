@@ -2,7 +2,15 @@ import network.mnist_loader as mnist
 import pickle as pkl
 import matplotlib.pyplot as plt
 import numpy as np
+from pathlib import Path
 
+with open('FNN_model.pkl', 'rb') as f:
+    net = pkl.load(f, encoding="latin1")
+
+FNN_adversarial = my_file = Path("FNN_adversarial.pkl")
+if FNN_adversarial.is_file():
+    with open('FNN_adversarial.pkl', 'rb') as f:
+        net2 = pkl.load(f, encoding="latin1")
 
 training_data, validation_data, test_data = mnist.load_data()
 
@@ -15,6 +23,9 @@ def gen_hot_vec(test_data):
         hotvec_test_data.append([x[0], hot_vector])
     return hotvec_test_data
 
+def predict_binary_thresholding(net, x):
+    y = (x > .5).astype(float)
+    return predict(net, y)
 
 def sigmoid(z):
     return 1.0/(1.0+np.exp(-z))
@@ -115,9 +126,4 @@ def accuracy(net, test_data, binary=0):
     for x in range(len(test_data)):
         if np.argmax(test_data[x][1]) == np.argmax((predict(net, test_data[x][0]), predict_binary_thresholding(net, test_data[x][0]))[binary==1]):
             count += 1
-        confusion_matrix[np.argmax(test_data[x][1])][np.argmax((predict(net, test_data[x][0]), predict_binary_thresholding(net, test_data[x][0]))[binary==1])] += 1
-        if np.argmax(test_data[x][1]) == 5 and np.argmax((predict(net, test_data[x][0]), predict_binary_thresholding(net, test_data[x][0]))[binary==1]) == 3:
-            plt.imshow(test_data[x][0].reshape(28,28), cmap='Greys')
-            plt.show()
-            input(" ")
     return (count/float(len(test_data)))*100

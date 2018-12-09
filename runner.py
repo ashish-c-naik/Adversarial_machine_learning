@@ -24,7 +24,7 @@ with open('FNN_adversarial.pkl', 'rb') as f:
 
 with open('adversarial_samples_test_set.pkl', 'rb') as f:
     adversarial_test_set = pkl.load(f, encoding="latin1")
-new_test_set = adversarial_test_set + gen_hot_vec(test_data)
+new_test_set = adversarial_test_set + u.gen_hot_vec(test_data)
 
 
 # for x in confusion_matrix:

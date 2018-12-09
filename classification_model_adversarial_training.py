@@ -12,5 +12,5 @@ with open('adversarial_samples_training_set.pkl', 'rb') as f:
 # Train FNN using the adversarial samples along with the normal training dataset.
 net2 = network.Network([784,30,10])
 net2.SGD(adversarial_dataset + training_data, 100, 5, 0.1)
-filename = 'trained_adversarial.pkl'
+filename = 'FNN_adversarial.pkl'
 pickle.dump(net2, open(filename, 'wb'))
