@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import util as u
 
-confusion_matrix = [[0 for x in range(10)] for y in range(10)]
 training_data, validation_data, test_data = mnist.load_data()
 
 
@@ -27,8 +26,7 @@ with open('adversarial_samples_test_set.pkl', 'rb') as f:
 new_test_set = adversarial_test_set + u.gen_hot_vec(test_data)
 
 
-# for x in confusion_matrix:
-    # print(x)  
+
 print('Accuracy of untrained FNN on non-adversarial test set: ' + str(u.accuracy(net, u.gen_hot_vec(test_data))) +'%')
 print(" ")
 print('Accuracy of attack on untrained FNN: ' + str(100 - u.accuracy(net, adversarial_test_set)) +'%')

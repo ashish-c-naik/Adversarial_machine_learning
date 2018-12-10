@@ -1,9 +1,3 @@
-# This file is used to generate the adversarial data set 
-# Note:
-# Prerequisites to run this file:
-# 1) Classification model : Train the model use the "classification_model.py" file
-
-
 import pickle
 import util
 
